@@ -1,0 +1,40 @@
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+    background-color: antiquewhite;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+#root {
+    display: flex;
+    justify-content: center;
+}
+.flags {
+  max-width: 400px;
+  max-height: 400px;
+  margin: 50px;
+  padding: 15px;
+  background-color: rgb(187, 187, 187);
+    }
+.textBox {
+    background-color: white;
+    height: 30px;
+    width: 200px;
+}    
+
+.btn {
+    min-height:  30px;
+    width: 70px;
+    margin: 10px;
+}
+
+.answer {
+    margin-top: 30px;
+    font-size: 1.5rem;
+}
+
+.dog > img {
+    max-width: 400px;
+    max-height: 400px;
+}
