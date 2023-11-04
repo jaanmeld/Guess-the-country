@@ -15,8 +15,7 @@ async function getCountries() {
   const timezone = country.timezones[0];
   const region = country.region;
   const coatOfArms = country.coatOfArms.png;
-  const countryData = {
-    name: name,
+  const countryData = { name,
     flagUrl,
     capital: capital,
     region: region,
@@ -26,6 +25,80 @@ async function getCountries() {
 
   return countryData;
 }
+
+
+function correct({ main, countryData, flags, giveUp, helpBtn, button}) {
+  const answer = document.createElement('div');
+  answer.classList.add('answer');
+  answer.innerText = countryData.name;
+  main.insertBefore(answer, flags);
+  giveUp.disabled = true;
+  helpBtn.disabled = true;
+  button.disabled = true;
+}
+
+async function guess({ textBox, button, countryData, flags, giveUp, helpBtn, main }) {
+  let intent = '';
+  textBox.addEventListener('keydown', function(event) {
+    intent = event.target.value;
+  });
+
+
+  button.addEventListener('click', async () => {
+    console.log(intent);
+    if (intent === countryData.name) {
+      correct({ main, countryData, flags, giveUp, helpBtn, button });
+      await goodBoy();
+    }
+    // console.log(intent, countryData.name);
+  });
+  textBox.addEventListener('keydown', async (event) => {
+    if (event.key === 'Enter' && intent === countryData.name) {
+      correct({ main, countryData, flags, giveUp, helpBtn, button });
+      await goodBoy();
+      console.log('Enter key pressed');
+      console.log(event);
+    }
+  });
+}
+
+async function goodBoy() {
+  const randomDogs = await fetch('https://dog.ceo/api/breeds/image/random');
+  const dogUrl = await randomDogs.json();
+  const dog = document.querySelector('.dog');  // New 'dog' just for this function
+  const greatGuess = document.createElement('strong');
+  greatGuess.innerText = 'Great guess!';
+  dog.appendChild(greatGuess);
+  const br = document.createElement('br');
+  dog.append(br);
+  const dogPic = document.createElement('img');
+  dogPic.src = dogUrl.message;
+  dog.appendChild(dogPic);
+  // dog.innerHTML = '<strong>Great guess!</strong><br>Here is a random picure of a good boy for you!<br><img src="' + dogUrl.message + '" alt="Good boy!">';
+  // console.log(dogUrl.message);
+}
+
+function help({ helpBtn, clues, clue1, clue2, clue3 }) {
+  let i = 1;
+  helpBtn.addEventListener('click', () => {
+    i == 1 && clues.append(clue1);
+    i == 2 && clues.append(clue2);
+    i == 3 && clues.append(clue3);
+    i++;
+    if (i > 3) {
+      helpBtn.disabled = true;
+    }
+  });
+}
+
+function givingUp({main, countryData, flags, giveUp, helpBtn, button }) {
+  giveUp.addEventListener('click', () => {
+    correct({ main, countryData, flags, giveUp, helpBtn, button});     // How to use correct() instead??
+  });
+
+}
+
+
 
 function createHtml(countryData) {
   const root = document.getElementById('root');
@@ -83,68 +156,6 @@ function createHtml(countryData) {
   main.append(next);
 
 
-  function guess() {
-    let intent = '';
-    textBox.addEventListener('keydown', function(event) {
-      intent = event.target.value;
-    });
-
-    function correct() {
-      const answer = document.createElement('div');
-      answer.classList.add('answer');
-      answer.innerText = countryData.name;
-      main.insertBefore(answer, flags);
-      giveUp.disabled = true;
-      helpBtn.disabled = true;
-      button.disabled = true;
-    }
-
-    button.addEventListener('click', () => {
-      if (intent === countryData.name) {
-        correct();
-        goodBoy();
-      }
-      textBox.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-          console.log('Enter key pressed');
-          console.log(event);
-        }
-      });
-      // console.log(intent, countryData.name);
-    });
-
-  }
-  guess();
-
-  function help() {
-    let i = 1;
-    helpBtn.addEventListener('click', () => {
-      i == 1 && clues.append(clue1);
-      i == 2 && clues.append(clue2);
-      i == 3 && clues.append(clue3);
-      i++;
-      if (i > 3) {
-        helpBtn.disabled = true;
-      }
-    });
-  }
-  help();
-
-
-  function givingUp() {
-    giveUp.addEventListener('click', () => {          // How to use correct() instead??
-      const answer = document.createElement('div');
-      answer.classList.add('answer');
-      answer.innerText = countryData.name;
-      main.insertBefore(answer, flags);
-      giveUp.disabled = true;
-      helpBtn.disabled = true;
-      button.disabled = true;
-    });
-
-  }
-  givingUp();
-
   next.addEventListener('click', function() {
     if (button.disabled == true) {
       location.reload();
@@ -154,19 +165,24 @@ function createHtml(countryData) {
     }
   });
 
-  async function goodBoy() {
-    const randomDogs = await fetch('https://dog.ceo/api/breeds/image/random');
-    const dogUrl = await randomDogs.json();
-
-    dog.innerHTML = '<strong>Great guess!</strong><br>Here is a random picure of a good boy for you!<br><img src="' + dogUrl.message + '" alt="Good boy!">';
-    console.log(dogUrl.message);
-  }
+  const output = { textBox, button, flags, giveUp, helpBtn, main, clues, clue1, clue2, clue3 };
+  return output;
 }
 
 
 async function buildPage() {
   const countryData = await getCountries();
- createHtml(countryData);
-}
+  const {textBox, button, flags, giveUp, helpBtn, main, clues, clue1, clue2, clue3 } =  createHtml(countryData);  // destructuring
 
+  guess({textBox, button, countryData, flags, giveUp, helpBtn, main });
+  help({ helpBtn, clues, clue1, clue2, clue3 });
+  givingUp({main, countryData, flags, giveUp, helpBtn, button });
+  console.log(countryData.name);
+}
 buildPage();
+
+
+
+
+
+// Object.keys(obj), Object.values(obj), Object.entries(obj)
